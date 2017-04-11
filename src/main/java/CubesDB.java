@@ -10,8 +10,14 @@ public class CubesDB {
     static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/cubes";
     static final String USER = "";
     static final String PASSWORD = "";
+//    static final String table_name = "cubestbl";
 
     public static void main(String[] args) {
+
+        String table_name = "cubestbl";
+        String name_col = "Bot_Name";
+        String time_col = "Time_Taken";
+
         try {
             Class.forName(JDBC_DRIVER);
         }
@@ -24,9 +30,10 @@ public class CubesDB {
         try (Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
             Statement statement = connection.createStatement()) {
 
+            String dropTable = "drop table if exists " + table_name;
+            statement.executeUpdate(dropTable);
 
-
-            String commandText = "create table if not exists cubestbl (Name varchar(50), Time_Taken double)";
+            String commandText = "create table if not exists " + table_name + " (" + name_col + " varchar(50), " + time_col + " double)";
             statement.executeUpdate(commandText);
             System.out.println("Successfully created table");
 
@@ -34,9 +41,18 @@ public class CubesDB {
             String[] allNames = {"Cubestormer II robot", "Fakhri Raihaan (using his feet)", "Ruxin Liu (age 3)", "Mats Valk (human record holder)"};
             double[] allTimes = {5.270, 27.93, 99.33, 6.27};
 
+            String prepStatInsert = "insert into " + table_name + " values ( ? , ? )";
+            PreparedStatement psInsert = connection.prepareStatement(prepStatInsert);
+//            String prepStatUpdate = "update " + table_name + " set " + time_col + " = ? where " + name_col + " = ?";
+//            PreparedStatement psUpdate = connection.prepareStatement(prepStatUpdate);
+            String prepStatDelete = "delete from " + table_name + " where " + name_col + " like ?";
+            PreparedStatement psDelete = connection.prepareStatement(prepStatDelete);
+            String prepStatSearch = "select * from " + table_name + " where " + name_col + " like %?%";
+            PreparedStatement psSearch = connection.prepareStatement(prepStatSearch);
+
+
             for (int x = 0; x < allNames.length; x++) {
-                String prepStatInsert = "insert into cubestbl values ( ? , ? )";
-                PreparedStatement psInsert = connection.prepareStatement(prepStatInsert);
+
                 psInsert.setString(1, allNames[x]);
                 psInsert.setDouble(2, allTimes[x]);
                 psInsert.executeUpdate();
@@ -46,28 +62,87 @@ public class CubesDB {
             }
 
 
-            String fetchAll = "select * from cubestbl";
+            String fetchAll = "select * from " + table_name;
             ResultSet myData = statement.executeQuery(fetchAll);
 
             while (myData.next()) {
-                String myName = myData.getString("Name");
-                double myTime = myData.getFloat("Time_Taken");
-                System.out.println("Name: " + myName + "  Time: " + myTime);
+                String myName = myData.getString(name_col);
+                double myTime = myData.getFloat(time_col);
+                System.out.println(String.format("Name: %s Time: %.3f", myName, myTime));
+//                System.out.println("Name: " + myName + "  Time: " + myTime);
             }
 
 
-            String wantNewEntry = Input.getStringInput("Want to add a new entry? (Y/N)");
-            while (!wantNewEntry.equalsIgnoreCase("N")) {
-                String solver = Input.getStringInput("Enter name:");
-                double time_taken = Input.getDoubleInput("Enter time:");
-                String prepStatInsert = "insert into cubestbl values ( ? , ? )";
-                PreparedStatement psInsert = connection.prepareStatement(prepStatInsert);
-                psInsert.setString(1, solver);
-                psInsert.setDouble(2, time_taken);
-                psInsert.executeUpdate();
-                wantNewEntry = Input.getStringInput("Want to add a new entry? (Y/N)");
+            String menu_question = "What action would you like to take:\n" +
+                    "1 -- Add New Entry\n" +
+                    "2 -- Update An Entry\n"  +
+                    "3 -- Exit Program";
 
+            boolean wants_more = true;
+            int action_number = Input.getPositiveIntInput(menu_question);
+
+//            while (wants_more == true) {
+            do {
+                switch (action_number) {
+                    case 1:
+                        String bot_name = Input.getStringInput("Enter name:");
+                        double time_taken = Input.getDoubleInput("Enter time:");
+                        psInsert.setString(1, bot_name);
+                        psInsert.setDouble(2, time_taken);
+                        psInsert.executeUpdate();
+                        System.out.println(bot_name + " has been added!");
+                        break;
+                    case 2:
+                        String which_bot = Input.getStringInput("Enter name of bot:");
+                        double new_time = Input.getDoubleInput("Enter new time:");
+
+                        psSearch.setString(1, which_bot);
+                        myData = statement.executeQuery(prepStatSearch);
+//                        myData.next();
+                        int search_count = myData.getFetchSize();
+                        if (search_count == 1) {
+
+                        }
+//                        myData = statement.executeQuery(fetchAll);
+//                        if (myData.getString(which_bot).isEmpty()) {
+//                            System.out.println("There is no bot");
+//                        }
+                        psDelete.setString(1, which_bot);
+                        psDelete.executeUpdate();
+
+                        psInsert.setString(1, which_bot);
+                        psInsert.setDouble(2, new_time);
+                        psInsert.executeUpdate();
+//                        psUpdate.setDouble(1, new_time);
+//                        psUpdate.setString(2, which_bot);
+//                        psUpdate.executeUpdate();
+                        break;
+                    case 3:
+                        wants_more = false;
+                        break;
+                    default:
+                        System.out.println("That is not a valid input. Try again.");
+                        break;
+                }
+                if (action_number != 3) {
+                    action_number = Input.getPositiveIntInput(menu_question);
+                }
             }
+            while (wants_more == true);
+
+
+//            String wantNewEntry = Input.getStringInput("Want to add a new entry? (Y/N)");
+//            while (!wantNewEntry.equalsIgnoreCase("N")) {
+//                String bot_name = Input.getStringInput("Enter name:");
+//                double time_taken = Input.getDoubleInput("Enter time:");
+////                String prepStatInsert = "insert into " + table_name + " values ( ? , ? )";
+////                PreparedStatement psInsert = connection.prepareStatement(prepStatInsert);
+//                psInsert.setString(1, bot_name);
+//                psInsert.setDouble(2, time_taken);
+//                psInsert.executeUpdate();
+//                wantNewEntry = Input.getStringInput("Want to add a new entry? (Y/N)");
+//
+//            }
 
 
             myData.close();
@@ -80,3 +155,5 @@ public class CubesDB {
         }
     }
 }
+
+

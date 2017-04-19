@@ -43,11 +43,11 @@ public class CubesDB {
 
             String prepStatInsert = "insert into " + table_name + " values ( ? , ? )";
             PreparedStatement psInsert = connection.prepareStatement(prepStatInsert);
-//            String prepStatUpdate = "update " + table_name + " set " + time_col + " = ? where " + name_col + " = ?";
-//            PreparedStatement psUpdate = connection.prepareStatement(prepStatUpdate);
+            String prepStatUpdate = "update " + table_name + " set " + time_col + " = ? where " + name_col + " = ?";
+            PreparedStatement psUpdate = connection.prepareStatement(prepStatUpdate);
             String prepStatDelete = "delete from " + table_name + " where " + name_col + " like ?";
             PreparedStatement psDelete = connection.prepareStatement(prepStatDelete);
-            String prepStatSearch = "select * from " + table_name + " where " + name_col + " LIKE ?";
+            String prepStatSearch = "select * from " + table_name + " where " + name_col + " = ?";
             PreparedStatement psSearch = connection.prepareStatement(prepStatSearch);
 
 
@@ -116,12 +116,18 @@ public class CubesDB {
 
 
 
-                        psDelete.setString(1, which_bot);
-                        psDelete.executeUpdate();
-//
-                        psInsert.setString(1, which_bot);
-                        psInsert.setDouble(2, new_time);
-                        psInsert.executeUpdate();
+                        psUpdate.setString(2, which_bot);
+                        psUpdate.setDouble(1, new_time);
+                        psUpdate.executeUpdate();
+
+
+
+//                        psDelete.setString(1, which_bot);
+//                        psDelete.executeUpdate();
+////
+//                        psInsert.setString(1, which_bot);
+//                        psInsert.setDouble(2, new_time);
+//                        psInsert.executeUpdate();
 
 
 

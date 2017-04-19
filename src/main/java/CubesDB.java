@@ -8,8 +8,8 @@ public class CubesDB {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     // Connection string.
     static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/cubes";
-    static final String USER = "";
-    static final String PASSWORD = "";
+    static final String USER = "abc";
+    static final String PASSWORD = "one";
 //    static final String table_name = "cubestbl";
 
     public static void main(String[] args) {
@@ -47,7 +47,7 @@ public class CubesDB {
 //            PreparedStatement psUpdate = connection.prepareStatement(prepStatUpdate);
             String prepStatDelete = "delete from " + table_name + " where " + name_col + " like ?";
             PreparedStatement psDelete = connection.prepareStatement(prepStatDelete);
-            String prepStatSearch = "select * from " + table_name + " where " + name_col + " like %?%";
+            String prepStatSearch = "select * from " + table_name + " where " + name_col + " LIKE ?";
             PreparedStatement psSearch = connection.prepareStatement(prepStatSearch);
 
 
@@ -96,23 +96,36 @@ public class CubesDB {
                         String which_bot = Input.getStringInput("Enter name of bot:");
                         double new_time = Input.getDoubleInput("Enter new time:");
 
-                        psSearch.setString(1, which_bot);
-                        myData = statement.executeQuery(prepStatSearch);
-//                        myData.next();
-                        int search_count = myData.getFetchSize();
-                        if (search_count == 1) {
+//                        psSearch.setString(1, which_bot);
+//                        System.out.println(psSearch.toString());
+//                        ResultSet myData2 = statement.executeQuery(prepStatSearch);
+////                        myData.next();
+//                        int search_count = myData.getFetchSize();
+//                        if (search_count == 1) {
+//
+//                        }
 
-                        }
+
+
+
+
 //                        myData = statement.executeQuery(fetchAll);
 //                        if (myData.getString(which_bot).isEmpty()) {
 //                            System.out.println("There is no bot");
 //                        }
+
+
+
                         psDelete.setString(1, which_bot);
                         psDelete.executeUpdate();
-
+//
                         psInsert.setString(1, which_bot);
                         psInsert.setDouble(2, new_time);
                         psInsert.executeUpdate();
+
+
+
+
 //                        psUpdate.setDouble(1, new_time);
 //                        psUpdate.setString(2, which_bot);
 //                        psUpdate.executeUpdate();
